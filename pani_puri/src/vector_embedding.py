@@ -14,7 +14,7 @@ from lancedb.embeddings import with_embeddings
 from parse_files import parse_file, parse_files, split_into_sentences
 from pypdf import PdfReader
 
-OPENAI_MODEL = None
+OPENAI_MODEL = "text-embedding-ada-002"
 
 db = lancedb.connect("~/tmp/lancedbprj")
 
@@ -45,7 +45,7 @@ def create_prompt(query, context):
         {
             "role": "user",
             "content": "Context:\n"
-            + "We are talking about SQL Injection.\n\n---\n\n"
+            # + "We are talking about SQL Injection.\n\n---\n\n"
             + context_formatted,
         },
         {"role": "user", "content": prompt_end},
@@ -83,12 +83,14 @@ if table_name not in db.table_names():
         .text_col("text")
         .window(3)
         .stride(2)
-        .to_df()
+        .to_pandas()
     )
     # print(df)
     # print(type(df))
     # print(len(df['text'][0]))
+    print("start embedding")
     data = with_embeddings(embed_func, df, show_progress=True)
+    print("finish embedding")
     print(data.to_pandas().head(1))
     tbl = db.create_table(table_name, data)
     print(f"Created LaneDB table of length: {len(tbl)}")
