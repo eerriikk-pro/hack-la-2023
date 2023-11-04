@@ -1,0 +1,1 @@
+VECTORDB_FILE_PATH = "CourseFiles"
