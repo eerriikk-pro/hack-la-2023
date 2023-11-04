@@ -1,9 +1,7 @@
 import re
 from io import BytesIO
-from typing import Any, Dict, List
+from typing import List
 
-from langchain.docstore.document import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
 alphabets = "([A-Za-z])"

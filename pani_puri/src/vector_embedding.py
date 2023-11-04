@@ -1,18 +1,13 @@
-import argparse
 import os
-import re
-from io import BytesIO
 from typing import List
 
-import gradio as gr
 import lancedb
 import openai
 import pandas as pd
 from constants import VECTORDB_FILE_PATH
 from lancedb.context import contextualize
 from lancedb.embeddings import with_embeddings
-from parse_files import parse_file, parse_files, split_into_sentences
-from pypdf import PdfReader
+from parse_files import parse_files
 
 OPENAI_MODEL = "text-embedding-ada-002"
 
@@ -88,9 +83,7 @@ if table_name not in db.table_names():
     # print(df)
     # print(type(df))
     # print(len(df['text'][0]))
-    print("start embedding")
     data = with_embeddings(embed_func, df, show_progress=True)
-    print("finish embedding")
     print(data.to_pandas().head(1))
     tbl = db.create_table(table_name, data)
     print(f"Created LaneDB table of length: {len(tbl)}")
