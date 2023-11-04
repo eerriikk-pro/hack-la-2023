@@ -140,6 +140,8 @@ class CanvasDownloader(CanvasApi):
             return False
 
         for course in courses:
+            if ("course_code" not in course):
+                break
             print_c(course["course_code"], type_="group", padding=0)
             course_code, course_id = course["id"], course["course_code"]
 
@@ -307,6 +309,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
     API = CanvasDownloader(args.domain, args.token, args.o)
     API.download_files(args.all, args.f)
+
