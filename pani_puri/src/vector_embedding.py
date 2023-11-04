@@ -3,11 +3,6 @@ from typing import List
 
 import lancedb
 import openai
-import pandas as pd
-from constants import VECTORDB_FILE_PATH
-from lancedb.context import contextualize
-from lancedb.embeddings import with_embeddings
-from parse_files import parse_files
 
 OPENAI_MODEL = "text-embedding-ada-002"
 
@@ -56,46 +51,3 @@ def complete(prompt):
         max_tokens=3000,
     )
     return res["choices"][0]["message"]["content"]
-
-
-db = lancedb.connect("~/tmp/lancedbprj")
-
-table_name = "CanvasPapers"
-
-if table_name not in db.table_names():
-    assert len(openai.Model.list()["data"]) > 0
-    wd = os.getcwd()
-    # print(wd)
-    it = os.listdir(os.path.join(wd, VECTORDB_FILE_PATH))
-    files = []
-    for i in it:
-        files.append(os.path.join(wd, VECTORDB_FILE_PATH, i))
-    # print(files)
-    data = parse_files(files)
-    # print(len(data))
-    df = (
-        contextualize(pd.DataFrame({"text": data}))
-        .text_col("text")
-        .window(3)
-        .stride(2)
-        .to_pandas()
-    )
-    # print(df)
-    # print(type(df))
-    # print(len(df['text'][0]))
-    data = with_embeddings(embed_func, df, show_progress=True)
-    print(data.to_pandas().head(1))
-    tbl = db.create_table(table_name, data)
-    print(f"Created LaneDB table of length: {len(tbl)}")
-else:
-    tbl = db.open_table(table_name)
-
-
-def query_text(query):
-    emb = embed_func(query)[0]
-    context = tbl.search(emb).limit(3).to_df()
-    # print(context)
-    prompt = create_prompt(query, context)
-    # print(prompt)
-    ans = complete(prompt)
-    return ans
