@@ -106,8 +106,7 @@ anon_students <- anon_students %>% select(-statement_version, -type, - action,
                                           -event__extensions_request_id, 
                                           -event__object_extensions_asset_subtype,
                                           -event__object_extensions_http_method,
-                                          -event__attachment_type,
-                                          -actor_id)
+                                          -event__attachment_type)
 View(anon_students)
 
 anon_students <- anon_students %>%
@@ -119,6 +118,11 @@ anon_students <- anon_students %>%
     hour = hour(event_time_pst)
   ) %>%
   select(-event_time)
+
+# count number of students
+unique_values <- anon_students %>% distinct(actor_id)
+anon_row_num <- count(unique_values)
+anon_row_num
 
 View(anon_students)
 
