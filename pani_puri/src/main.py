@@ -15,13 +15,13 @@ from vector_embedding import complete, create_prompt, embed_func
 db = lancedb.connect("~/tmp/lancedbprj")
 
 # table_name = "LING200"
-table_name = "MATH437"
-
+# table_name = "MATH437"
+table_name = "CPSC320"
 
 if table_name not in db.table_names():
     assert len(openai.Model.list()["data"]) > 0
     wd = os.getcwd()
-    file_path = os.path.join(wd, VECTORDB_FILE_PATH, "MATH 437 101 2023W1")
+    file_path = os.path.join(wd, VECTORDB_FILE_PATH, "CPSC 320 921 2023S2")
     # print(wd)
     # it = os.listdir(os.path.join(wd, VECTORDB_FILE_PATH))
     paths = pathlib.Path(file_path)
