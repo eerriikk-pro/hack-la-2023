@@ -16,7 +16,9 @@ db = lancedb.connect("~/tmp/lancedbprj")
 
 # table_name = "LING200"
 # table_name = "MATH437"
-table_name = "CPSC320"
+# table_name = "CPSC320"
+# table_name = "LING200_WithTXTBK"
+table_name = "CPSC320_WithTXTBK"
 
 if table_name not in db.table_names():
     assert len(openai.Model.list()["data"]) > 0
