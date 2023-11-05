@@ -18,3 +18,5 @@ We want to thank the creaters of:
 ## Wins / Challenges
 > Describe some wins / challenges. What did you learn? What would you do differently next time?
 
+Our group is very satisfied with the actual product and accompanying demo. With that being said, it was hard coming up with any conclusions without reaching like crazy given how little quantitative data we were provided - qualitative data is much harder to analyze. With that being said, we learned that there is indeed a lot of data produced by Canvas, but a large portion of it is privatized. Next time, we might not focus as much on perfecting our data frames, and instead focus more on the visualizations.
+

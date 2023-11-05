@@ -199,7 +199,7 @@ class CanvasDownloader(CanvasApi):
                 return False
 
             # TODO: A module can have a name that is not a valid path
-            module_path = [course_name, module["name"].strip().replace("/", "&").replace(":", "&")]
+            module_path = [course_name, module["name"].strip().replace("/", "&").replace(":", "-")]
             print_c("[M] " + module["name"], "item", 1)
 
             for item in module_items:
