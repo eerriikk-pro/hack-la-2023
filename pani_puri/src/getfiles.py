@@ -1,5 +1,3 @@
-import pandas as pd
-import numpy as np
 import requests
 from canvasapi import Canvas
 import re
@@ -9,6 +7,7 @@ import os
 import requests
 import json
 import colorama
+from bs4 import BeautifulSoup 
 
 colorama.init(autoreset=True)
 
@@ -83,6 +82,15 @@ class CanvasApi:
         )
         return response.json()
 
+    def geturl(self, urlstr: str, **kwarg):
+        response = requests.get(
+            url=urlstr,
+            headers={"Authorization": f"Bearer {self.token}"},
+            **kwarg,
+        )
+        return response.json()
+
+
     def get_courses(self, only_favorites: bool = True) -> list:
         """Returns the enrolled courses"""
         if only_favorites:
@@ -119,10 +127,19 @@ class CanvasApi:
     def get_file_from_id(self, course_id: int, file_id: int) -> dict:
         """Gets a file of a specific course using it's id"""
         return self.__get(f"courses/{course_id}/files/{file_id}")
+    
+    def get_fileurl_from_id(self, course_id: int, file_id: int) -> str:
+        prefix = "/".join(("https:/", self.domain, "api/v1"))
+        return fr"{prefix}/courses/{course_id}/files/{file_id}"
+    
 
     def get_folder_from_id(self, course_id: int, folder_id: int) -> dict:
         """Gets a folder from a specific course using it's id"""
         return self.__get(f"courses/{course_id}/folders/{folder_id}")
+
+    def get_file_ids_from_page(self, page_obj, course_id: int):
+        soup = BeautifulSoup(page_obj['body'], 'html5lib') # If this line causes an error, run 'pip install html5lib' or install html5lib 
+        return re.findall(fr"https://{self.domain}/courses/{course_id}/files/(\d+)", str(soup)) 
 
 
 @dataclasses.dataclass
@@ -160,6 +177,11 @@ class CanvasDownloader(CanvasApi):
                 methods[1](course_code, course_id)
         return True
 
+    # TODO
+    def _download_from_files(self, course_id, course_name) -> bool:
+        files_list = self.get_files(course_id)
+        return False
+
     def _download_from_folders(self, course_id, course_name) -> bool:
         folders_list = self.get_folders(course_id)
         for folder in folders_list:
@@ -187,6 +209,7 @@ class CanvasDownloader(CanvasApi):
 
     def _download_from_modules(self, course_id, course_name) -> bool:
         modules_list = self.get_modules(course_id)
+        fileset = set()
 
         for module in modules_list:
 
@@ -199,7 +222,7 @@ class CanvasDownloader(CanvasApi):
                 return False
 
             # TODO: A module can have a name that is not a valid path
-            module_path = [course_name, module["name"].strip().replace("/", "&").replace(":", "&")]
+            module_path = [course_name, module["name"].strip().replace("/", "&").replace(":", "-").replace("?", "")]
             print_c("[M] " + module["name"], "item", 1)
 
             for item in module_items:
@@ -217,6 +240,17 @@ class CanvasDownloader(CanvasApi):
                     download_url = get_external_download_url(item["external_url"])
                     if download_url:
                         self._download_file(download_url, module_path)
+                elif item["type"] == "Page":
+                    if ('download' in item['url']):
+                        break
+                    page_obj = self.geturl(item['url'])
+                    if 'body' in page_obj:
+                        file_ids = self.get_file_ids_from_page(page_obj, course_id)
+                        fileset.update(file_ids)
+
+        for file_id in fileset:
+            file_url = self.get_fileurl_from_id(course_id, file_id)
+            self._download_file(file_url, module_path)
 
         return True
 
@@ -308,7 +342,7 @@ if __name__ == "__main__":
         "--all", action="store_true", help="Get all courses instead of only favorites"
     )
 
-    args = parser.parse_args()
-    API = CanvasDownloader(args.domain, args.token, args.o)
-    API.download_files(args.all, args.f)
+#    args = parser.parse_args()
+    API = CanvasDownloader("canvas.ubc.ca", "11224~mazjduIBv1poQzyDMrvvR0jKMDHgJjAWLkr2ilXWWHeRo03r8VV90auZQNfdkDjP", "CanvasFiles")
+    API.download_files(False, "CanvasFiles")
 
